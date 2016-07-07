@@ -1,0 +1,23 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+html {
+    background-color: #4A5F70;
+}
+
+body {
+    margin: 0;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 10px solid #66777D;
+}
