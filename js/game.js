@@ -28,8 +28,12 @@ var Game = (function() {
     _addKeyboard();
 
     function _drawCar(car) {
+        _context.save();
+        _context.translate(car.getX(), car.getY());
+        _context.rotate(-car.getDirection());
         var size = 100;
-        _context.fillRect(car.getX() - (size / 2), car.getY() - (size / 2), size, size);
+        _context.fillRect(-(size / 2), -(size / 2), size, size);
+        _context.restore();
     }
 
     function _findGamepad(id) {
