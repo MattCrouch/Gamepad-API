@@ -17,11 +17,29 @@ var Game = (function() {
         _players.push(new Keyboard());
     }
 
+    function _addGamepad(id) {
+        console.log("Gamepad added");
+        var gamepad = new Gamepad(id);
+        _players.push(gamepad);
+
+        return gamepad;
+    }
+
     _addKeyboard();
 
     function _drawCar(car) {
         var size = 100;
         _context.fillRect(car.getX() - (size / 2), car.getY() - (size / 2), size, size);
+    }
+
+    function _findGamepad(id) {
+        for(var i = 0; i < _players.length; i++) {
+            if(_players[i].getId() === id) {
+                return _players[i];
+            }
+        }
+
+        return undefined;
     }
 
     function _clearCanvas() {
@@ -34,6 +52,17 @@ var Game = (function() {
             delta = window.performance.now() - _lastUpdate;
         }
         _lastUpdate = window.performance.now();
+
+        var gamepads = navigator.getGamepads();
+        for(var i = 0; i < gamepads.length; i++) {
+            if(gamepads[i] !== undefined) {
+                var player = _findGamepad(gamepads[i].id);
+                if(!player) {
+                    player = _addGamepad(gamepads[i].id);
+                }
+                player.updateMovement(gamepads[i]);
+            }
+        }
 
         _clearCanvas();
         _update(delta);

@@ -1,8 +1,9 @@
-var Controller = function() {
+var Controller = function(id) {
     this._forward = 0;
     this._backward = 0;
     this._left = 0;
     this._right = 0;
+    this._id = id;
     this._car = new Car();
 }
 
@@ -60,6 +61,10 @@ Controller.prototype.moveCar = function() {
     this.getCar().go(go);
 }
 
+Controller.prototype.getId = function() {
+    return this._id;
+}
+
 var Keyboard = function() {
     Controller.call(this);
     console.log("KEYBOARD");
@@ -104,12 +109,34 @@ Keyboard.prototype.addListeners = function() {
     });
 }
 
-var Gamepad = function() {
-    Controller.call(this);
+var Gamepad = function(id) {
+    Controller.call(this, id);
 }
 Gamepad.prototype = Object.create(Controller.prototype);
 Gamepad.prototype.constructor = Gamepad;
+Gamepad.prototype.updateMovement = function(gamepad) {
+    if(gamepad.axes[0] < -0.2) {
+        this.setLeft(Math.abs(gamepad.axes[0]));
+        this.setRight(0);
+    } else if(gamepad.axes[0] > 0.2) {
+        this.setLeft(0);
+        this.setRight(Math.abs(gamepad.axes[0]));
+    } else {
+        this.setLeft(0);
+        this.setRight(0);
+    }
 
+    if(gamepad.axes[1] < -0.2) {
+        this.setForward(Math.abs(gamepad.axes[1]));
+        this.setBackward(0);
+    } else if(gamepad.axes[1] > 0.2) {
+        this.setForward(0);
+        this.setBackward(Math.abs(gamepad.axes[1]));
+    } else {
+        this.setForward(0);
+        this.setBackward(0);        
+    }
+}
 
 
 
