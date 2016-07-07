@@ -115,91 +115,25 @@ var Gamepad = function(id) {
 Gamepad.prototype = Object.create(Controller.prototype);
 Gamepad.prototype.constructor = Gamepad;
 Gamepad.prototype.updateMovement = function(gamepad) {
-    if(gamepad.axes[0] < -0.2) {
-        this.setLeft(Math.abs(gamepad.axes[0]));
-        this.setRight(0);
-    } else if(gamepad.axes[0] > 0.2) {
+    if(gamepad.axes[2] < -0.2) {
         this.setLeft(0);
-        this.setRight(Math.abs(gamepad.axes[0]));
+        this.setRight(Math.abs(gamepad.axes[2]));
+    } else if(gamepad.axes[2] > 0.2) {
+        this.setLeft(Math.abs(gamepad.axes[2]));
+        this.setRight(0);
     } else {
         this.setLeft(0);
         this.setRight(0);
     }
 
-    if(gamepad.axes[1] < -0.2) {
-        this.setForward(Math.abs(gamepad.axes[1]));
+    if(gamepad.buttons[7].value > 0) {
+        this.setForward(Math.abs(gamepad.buttons[7].value));
         this.setBackward(0);
-    } else if(gamepad.axes[1] > 0.2) {
+    } else if(gamepad.buttons[6].value > 0) {
         this.setForward(0);
-        this.setBackward(Math.abs(gamepad.axes[1]));
+        this.setBackward(Math.abs(gamepad.buttons[6].value));
     } else {
         this.setForward(0);
         this.setBackward(0);        
     }
 }
-
-
-
-
-// var Controller = function(method) {
-//     var _forward = 0;
-//     var _backward = 0;
-//     var _left = 0;
-//     var _right = 0;
-//     var _car;
-
-//     function getForward() {
-//         return _forward;
-//     }
-
-//     function setForward(val) {
-//         _forward = val;
-//     }
-
-//     function getBackward() {
-//         return _backward;
-//     }
-
-//     function setBackward(val) {
-//         _backward = val;
-//     }
-
-//     function getLeft() {
-//         return _left;
-//     }
-
-//     function setLeft(val) {
-//         _left = val;
-//     }
-
-//     function getRight() {
-//         return _right;
-//     }
-
-//     function setRight(val) {
-//         _right = val;
-//     }
-
-//     function getCar() {
-//         return _car;
-//     }
-
-//     function setCar(car) {
-//         _car = car;
-//     }
-
-//     setCar(new Car());
-
-//     return {
-//         getForward: getForward,
-//         setForward: setForward,
-//         getBackward: getBackward,
-//         setBackward: setBackward,
-//         getLeft: getLeft,
-//         setLeft: setLeft,
-//         getRight: getRight,
-//         setRight: setRight,
-//         getCar: getCar,
-//         setCar: setCar
-//     }
-// };
