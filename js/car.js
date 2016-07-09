@@ -1,9 +1,10 @@
-var Car = function() {
-    var _x = 0;
-    var _y = 0;
+var Car = function(startX, startY) {
+    var _x = Number.isInteger(startX) ? startX : 0;
+    var _y = Number.isInteger(startY) ? startY : 0;
     var _direction = 0;
     var _driveSpeed = 10;
     var _turnSpeed = 0.05;
+    var _image;
 
     function getX() {
         return _x;
@@ -19,15 +20,10 @@ var Car = function() {
 
     function _getAngle() {
         return _direction;
-        // if(_direction < (Math.PI / 2)) {
-        //     return _direction;
-        // } else if(_direction < Math.PI) {
-        //     return Math.PI - _direction;
-        // } else if(_direction < ((3 * Math.PI) / 2)) {
-        //     return _direction - Math.PI;
-        // } else {
-        //     return (Math.PI * 2) - _direction;
-        // }
+    }
+
+    function getImage() {
+        return _image;
     }
 
     function _getNextX(angle, amount) {
@@ -72,12 +68,24 @@ var Car = function() {
         }
     }
 
+    function _loadImage() {
+        _image = new Image();
+        _image.src = "../assets/car.svg";
+    }
+
+    function init() {
+        _loadImage();
+    }
+
+    init();
+
     return {
         getX: getX,
         getY: getY,
         getDirection: getDirection,
         turn: turn,
         go: go,
-        checkBounds: checkBounds
+        checkBounds: checkBounds,
+        getImage: getImage
     }
 };

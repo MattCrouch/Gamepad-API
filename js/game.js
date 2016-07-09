@@ -14,12 +14,13 @@ var Game = (function() {
     _onResize();
 
     function _addKeyboard() {
-        _players.push(new Keyboard());
+        console.log("Keyboard added");
+        _players.push(new Keyboard(_canvas.width / 2, _canvas.height / 2));
     }
 
     function _addGamepad(id) {
         console.log("Gamepad added");
-        var gamepad = new Gamepad(id);
+        var gamepad = new Gamepad(id, _canvas.width / 2, _canvas.height / 2);
         _players.push(gamepad);
 
         return gamepad;
@@ -32,7 +33,9 @@ var Game = (function() {
         _context.translate(car.getX(), car.getY());
         _context.rotate(-car.getDirection());
         var size = 100;
-        _context.fillRect(-(size / 2), -(size / 2), size, size);
+        if(car.getImage().complete) {
+            _context.drawImage(car.getImage(), -(size / 2), -(size / 2), size, size);
+        }
         _context.restore();
     }
 

@@ -1,10 +1,11 @@
-var Controller = function(id) {
+var Controller = function(id, startX, startY) {
+    console.log("CONTROLLER:", startX, startY);
     this._forward = 0;
     this._backward = 0;
     this._left = 0;
     this._right = 0;
     this._id = id;
-    this._car = new Car();
+    this._car = new Car(startX, startY);
 }
 
 Controller.prototype.getForward = function() {
@@ -53,9 +54,11 @@ Controller.prototype.moveCar = function() {
 
     var go = 0;
     if(this.getForward() > 0) {
-        go = this.getForward();
+        //Canvas co-ordinate system starts at top-left. We need to minus values to go forward...
+        go = -this.getForward();
     } else {
-        go = -this.getBackward();
+        //...or positive to go backward
+        go = this.getBackward();
     }
     this.getCar().turn(turn);
     this.getCar().go(go);
@@ -65,10 +68,8 @@ Controller.prototype.getId = function() {
     return this._id;
 }
 
-var Keyboard = function() {
-    Controller.call(this);
-    console.log("KEYBOARD");
-    // this.addListeners.call(this);
+var Keyboard = function(startX, startY) {
+    Controller.call(this, undefined, startX, startY);
     this.addListeners();
 }
 Keyboard.prototype = Object.create(Controller.prototype);
@@ -109,8 +110,8 @@ Keyboard.prototype.addListeners = function() {
     });
 }
 
-var Gamepad = function(id) {
-    Controller.call(this, id);
+var Gamepad = function(id, startX, startY) {
+    Controller.call(this, id, startX, startY);
 }
 Gamepad.prototype = Object.create(Controller.prototype);
 Gamepad.prototype.constructor = Gamepad;
