@@ -54,11 +54,9 @@ Controller.prototype.moveCar = function() {
 
     var go = 0;
     if(this.getForward() > 0) {
-        //Canvas co-ordinate system starts at top-left. We need to minus values to go forward...
-        go = -this.getForward();
+        go = this.getForward();
     } else {
-        //...or positive to go backward
-        go = this.getBackward();
+        go = -this.getBackward();
     }
     this.getCar().turn(turn);
     this.getCar().go(go);

@@ -5,6 +5,7 @@ var Car = function(startX, startY) {
     var _driveSpeed = 10;
     var _turnSpeed = 0.05;
     var _image;
+    var _carType = Math.floor(Math.random() * 5);
 
     function getX() {
         return _x;
@@ -70,7 +71,7 @@ var Car = function(startX, startY) {
 
     function _loadImage() {
         _image = new Image();
-        _image.src = "../assets/car.svg";
+        _image.src = "../assets/cars/car" + _carType + ".svg";
     }
 
     function init() {

@@ -32,9 +32,10 @@ var Game = (function() {
         _context.save();
         _context.translate(car.getX(), car.getY());
         _context.rotate(-car.getDirection());
-        var size = 100;
+        var length = 150;
+        var width = car.getImage().width / (car.getImage().height / length);
         if(car.getImage().complete) {
-            _context.drawImage(car.getImage(), -(size / 2), -(size / 2), size, size);
+            _context.drawImage(car.getImage(), -(width / 2), -(length / 2), width, length);
         }
         _context.restore();
     }
