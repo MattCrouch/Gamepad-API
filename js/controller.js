@@ -1,5 +1,4 @@
 var Controller = function(id, startX, startY) {
-    console.log("CONTROLLER:", startX, startY);
     this._forward = 0;
     this._backward = 0;
     this._left = 0;
@@ -66,6 +65,14 @@ Controller.prototype.getId = function() {
     return this._id;
 }
 
+Controller.prototype.enableBoost = function() {
+    this._car.setBoost(true);
+}
+
+Controller.prototype.disableBoost = function() {
+    this._car.setBoost(false);
+}
+
 var Keyboard = function(startX, startY) {
     Controller.call(this, undefined, startX, startY);
     this.addListeners();
@@ -75,7 +82,7 @@ Keyboard.prototype.constructor = Keyboard;
 Keyboard.prototype.addListeners = function() {
     var self = this;
     window.addEventListener("keydown", function(e) {
-        switch(e.keyCode) {
+        switch(e.which) {
             case 38: //Up
                 self.setForward(1);
                 break;
@@ -87,6 +94,9 @@ Keyboard.prototype.addListeners = function() {
                 break;
             case 39: //Right
                 self.setLeft(1);
+                break;
+            case 32: //Space
+                self.enableBoost();
                 break;
         }
     });
@@ -104,6 +114,9 @@ Keyboard.prototype.addListeners = function() {
             case 39: //Right
                 self.setLeft(0);
                 break;
+            case 32: //Space
+                self.disableBoost();
+                break;
         }
     });
 }
@@ -114,11 +127,11 @@ var Gamepad = function(id, startX, startY) {
 Gamepad.prototype = Object.create(Controller.prototype);
 Gamepad.prototype.constructor = Gamepad;
 Gamepad.prototype.updateMovement = function(gamepad) {
-    if(gamepad.axes[2] < -0.2) {
+    if(gamepad.axes[0] < -0.2) {
         this.setLeft(0);
-        this.setRight(Math.abs(gamepad.axes[2]));
-    } else if(gamepad.axes[2] > 0.2) {
-        this.setLeft(Math.abs(gamepad.axes[2]));
+        this.setRight(Math.abs(gamepad.axes[0]));
+    } else if(gamepad.axes[0] > 0.2) {
+        this.setLeft(Math.abs(gamepad.axes[0]));
         this.setRight(0);
     } else {
         this.setLeft(0);
@@ -134,5 +147,11 @@ Gamepad.prototype.updateMovement = function(gamepad) {
     } else {
         this.setForward(0);
         this.setBackward(0);        
+    }
+
+    if(gamepad.buttons[0].pressed) {
+        this.enableBoost();
+    } else {
+        this.disableBoost();
     }
 }

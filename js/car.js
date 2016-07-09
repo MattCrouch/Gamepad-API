@@ -4,6 +4,7 @@ var Car = function(startX, startY) {
     var _direction = 0;
     var _driveSpeed = 10;
     var _turnSpeed = 0.05;
+    var _boost = false;
     var _image;
     var _carType = Math.floor(Math.random() * 5);
 
@@ -25,6 +26,10 @@ var Car = function(startX, startY) {
 
     function getImage() {
         return _image;
+    }
+
+    function setBoost(boost) {
+        _boost = boost;
     }
 
     function _getNextX(angle, amount) {
@@ -51,8 +56,12 @@ var Car = function(startX, startY) {
 
     function go(amount) {
         var angle = _getAngle();
-        _x = _getNextX(angle, amount * _driveSpeed);
-        _y = _getNextY(angle, amount * _driveSpeed);
+        var speed = _driveSpeed;
+        if(_boost) {
+            speed *= 2;
+        }
+        _x = _getNextX(angle, amount * speed);
+        _y = _getNextY(angle, amount * speed);
     }
 
     function checkBounds(width, height) {
@@ -87,6 +96,7 @@ var Car = function(startX, startY) {
         turn: turn,
         go: go,
         checkBounds: checkBounds,
-        getImage: getImage
+        getImage: getImage,
+        setBoost: setBoost
     }
 };
