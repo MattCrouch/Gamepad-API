@@ -8,7 +8,8 @@ html, body {
 }
 
 html {
-    background-color: #4A5F70;
+    background-color: #99CC41;
+    background: url("../assets/bg.png");
 }
 
 body {
@@ -19,5 +20,5 @@ canvas {
     display: block;
     width: 100%;
     height: 100%;
-    border: 10px solid #66777D;
+    border: 10px solid #83B231;
 }
