@@ -44,7 +44,7 @@ var Game = (function(canvas) {
     }
 
     function _removeGamepad(gamepad) {
-        var player = _findGamepad(gamepad.id);
+        var player = _findGamepad(gamepad.index);
 
         if(player) {
             var index = _players.indexOf(player);
@@ -91,7 +91,7 @@ var Game = (function(canvas) {
         var gamepads = navigator.getGamepads();
         for(var i = 0; i < gamepads.length; i++) {
             if(gamepads[i] !== undefined) {
-                var player = _findGamepad(gamepads[i].id);
+                var player = _findGamepad(gamepads[i].index);
                 if(!player) {
                     player = _addGamepad(gamepads[i]);
                 }

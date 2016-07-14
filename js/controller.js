@@ -122,7 +122,7 @@ Keyboard.prototype.addListeners = function() {
 }
 
 var Gamepad = function(gamepad, startX, startY) {
-    Controller.call(this, gamepad.id, startX, startY);
+    Controller.call(this, gamepad.index, startX, startY);
     this._gamepad = gamepad;
 }
 Gamepad.prototype = Object.create(Controller.prototype);
