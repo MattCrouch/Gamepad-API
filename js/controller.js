@@ -121,35 +121,39 @@ Keyboard.prototype.addListeners = function() {
     });
 }
 
-var Gamepad = function(id, startX, startY) {
-    Controller.call(this, id, startX, startY);
+var Gamepad = function(gamepad, startX, startY) {
+    Controller.call(this, gamepad.id, startX, startY);
+    this._gamepad = gamepad;
 }
 Gamepad.prototype = Object.create(Controller.prototype);
 Gamepad.prototype.constructor = Gamepad;
-Gamepad.prototype.updateMovement = function(gamepad) {
-    if(gamepad.axes[0] < -0.2) {
+Gamepad.prototype.getGamepad = function() {
+    return this._gamepad;
+}
+Gamepad.prototype.updateMovement = function() {
+    if(this.getGamepad().axes[0] < -0.2) {
         this.setLeft(0);
-        this.setRight(Math.abs(gamepad.axes[0]));
-    } else if(gamepad.axes[0] > 0.2) {
-        this.setLeft(Math.abs(gamepad.axes[0]));
+        this.setRight(Math.abs(this.getGamepad().axes[0]));
+    } else if(this.getGamepad().axes[0] > 0.2) {
+        this.setLeft(Math.abs(this.getGamepad().axes[0]));
         this.setRight(0);
     } else {
         this.setLeft(0);
         this.setRight(0);
     }
 
-    if(gamepad.buttons[7].value > 0) {
-        this.setForward(Math.abs(gamepad.buttons[7].value));
+    if(this.getGamepad().buttons[7].value > 0) {
+        this.setForward(Math.abs(this.getGamepad().buttons[7].value));
         this.setBackward(0);
-    } else if(gamepad.buttons[6].value > 0) {
+    } else if(this.getGamepad().buttons[6].value > 0) {
         this.setForward(0);
-        this.setBackward(Math.abs(gamepad.buttons[6].value));
+        this.setBackward(Math.abs(this.getGamepad().buttons[6].value));
     } else {
         this.setForward(0);
         this.setBackward(0);        
     }
 
-    if(gamepad.buttons[0].pressed) {
+    if(this.getGamepad().buttons[0].pressed) {
         this.enableBoost();
     } else {
         this.disableBoost();
