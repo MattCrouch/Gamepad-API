@@ -7,6 +7,8 @@ var Game = (function(canvas) {
     function _init() {
         _addListeners();
         _onResize();
+
+        // _addKeyboard();
     }
 
     function _addListeners() {
@@ -53,8 +55,6 @@ var Game = (function(canvas) {
         }
     }
 
-    _addKeyboard();
-
     function _drawCar(car) {
         _context.save();
         _context.translate(car.getX(), car.getY());
@@ -89,15 +89,22 @@ var Game = (function(canvas) {
         _lastUpdate = window.performance.now();
 
         var gamepads = navigator.getGamepads();
+        
         for(var i = 0; i < gamepads.length; i++) {
             if(gamepads[i] !== undefined) {
                 var player = _findGamepad(gamepads[i].index);
                 if(!player) {
                     player = _addGamepad(gamepads[i]);
                 }
-                player.updateMovement();
+                if(player) {
+                    player.updateMovement();
+                }
             }
         }
+
+        /*for(var i = 0; i < _players.length; i++) {
+            _players[i].updateMovement();
+        }*/
 
         _clearCanvas();
         _update(delta);
