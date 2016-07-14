@@ -1,29 +1,56 @@
-var Game = (function() {
-    var _canvas = document.getElementById("game");
+var Game = (function(canvas) {
+    var _canvas = canvas;
     var _context = _canvas.getContext("2d");
     var _lastUpdate;
     var _players = [];
 
-    window.addEventListener("resize", _onResize);
+    function _init() {
+        _addListeners();
+        _onResize();
+    }
+
+    function _addListeners() {
+        window.addEventListener("resize", _onResize);
+        window.addEventListener("gamepadconnected", _onGamepadConnected);
+        window.addEventListener("gamepaddisconnected", _onGamepadDisconnected);
+    }
 
     function _onResize() {
         _canvas.width = window.innerWidth;
         _canvas.height = window.innerHeight;
     }
 
-    _onResize();
+    function _onGamepadConnected(e) {
+        console.log("connected", e);
+        _addGamepad(e.gamepad);
+    }
+
+    function _onGamepadDisconnected(e) {
+        console.log("disconnected", e);
+        _removeGamepad(e.gamepad);
+    }
 
     function _addKeyboard() {
         console.log("Keyboard added");
         _players.push(new Keyboard(_canvas.width / 2, _canvas.height / 2));
     }
 
-    function _addGamepad(id) {
+    function _addGamepad(gamepad) {
         console.log("Gamepad added");
-        var gamepad = new Gamepad(id, _canvas.width / 2, _canvas.height / 2);
-        _players.push(gamepad);
+        var controller = new Gamepad(gamepad, _canvas.width / 2, _canvas.height / 2);
+        _players.push(controller);
 
-        return gamepad;
+        return controller;
+    }
+
+    function _removeGamepad(gamepad) {
+        var player = _findGamepad(gamepad.id);
+
+        if(player) {
+            var index = _players.indexOf(player);
+
+            _players.splice(index, 1);
+        }
     }
 
     _addKeyboard();
@@ -32,9 +59,9 @@ var Game = (function() {
         _context.save();
         _context.translate(car.getX(), car.getY());
         _context.rotate(-car.getDirection());
-        var length = 150;
-        var width = car.getImage().width / (car.getImage().height / length);
         if(car.getImage().complete) {
+            var length = 150;
+            var width = car.getImage().width / (car.getImage().height / length);
             _context.drawImage(car.getImage(), -(width / 2), -(length / 2), width, length);
         }
         _context.restore();
@@ -66,9 +93,9 @@ var Game = (function() {
             if(gamepads[i] !== undefined) {
                 var player = _findGamepad(gamepads[i].id);
                 if(!player) {
-                    player = _addGamepad(gamepads[i].id);
+                    player = _addGamepad(gamepads[i]);
                 }
-                player.updateMovement(gamepads[i]);
+                player.updateMovement();
             }
         }
 
@@ -87,9 +114,6 @@ var Game = (function() {
         }
     }
 
+    _init();
     _loop();
-
-    return {
-        
-    }
-})();
+})(document.getElementById("game"));
