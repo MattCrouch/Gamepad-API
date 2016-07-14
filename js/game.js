@@ -113,7 +113,7 @@ var Game = (function(canvas) {
 
     function _update(delta) {
         for(var i = 0; i < _players.length; i++) {
-            _players[i].moveCar();
+            _players[i].moveCar(delta);
             // _players[i].getCar().turn(Math.random() * (Math.PI * 2));
             // _players[i].getCar().go(Math.random() * 10);
             _players[i].getCar().checkBounds(_canvas.width, _canvas.height);

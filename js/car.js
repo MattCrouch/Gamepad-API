@@ -2,7 +2,7 @@ var Car = function(startX, startY) {
     var _x = Number.isInteger(startX) ? startX : 0;
     var _y = Number.isInteger(startY) ? startY : 0;
     var _direction = 0;
-    var _driveSpeed = 10;
+    var _driveSpeed = 1;
     var _turnSpeed = 0.05;
     var _boost = false;
     var _image;
@@ -54,12 +54,13 @@ var Car = function(startX, startY) {
         }
     }
 
-    function go(amount) {
+    function go(delta, amount) {
         var angle = _getAngle();
         var speed = _driveSpeed;
         if(_boost) {
             speed *= 2;
         }
+        speed *= delta;
         _x = _getNextX(angle, amount * speed);
         _y = _getNextY(angle, amount * speed);
     }

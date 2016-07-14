@@ -43,7 +43,7 @@ Controller.prototype.getCar = function() {
     return this._car;
 }
 
-Controller.prototype.moveCar = function() {
+Controller.prototype.moveCar = function(delta) {
     var turn = 0;
     if(this.getRight() > 0) {
         turn = this.getRight();
@@ -58,7 +58,7 @@ Controller.prototype.moveCar = function() {
         go = -this.getBackward();
     }
     this.getCar().turn(turn);
-    this.getCar().go(go);
+    this.getCar().go(delta, go);
 }
 
 Controller.prototype.getId = function() {
