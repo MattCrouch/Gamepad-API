@@ -58,7 +58,7 @@ var Game = (function(canvas) {
     function _drawCar(car) {
         _context.save();
         _context.translate(car.getX(), car.getY());
-        _context.rotate(-car.getDirection());
+        _context.rotate(car.getDirection());
         if(car.getImage().complete) {
             var length = 150;
             var width = car.getImage().width / (car.getImage().height / length);

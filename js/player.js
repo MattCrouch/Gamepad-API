@@ -28,7 +28,7 @@ Player.prototype.getLeft = function() {
 }
 
 Player.prototype.setLeft = function(value) {
-    this._left = value;
+    this._left = Math.abs(value);
 }
 
 Player.prototype.getRight = function() {
@@ -36,7 +36,7 @@ Player.prototype.getRight = function() {
 }
 
 Player.prototype.setRight = function(value) {
-    this._right = value;
+    this._right = Math.abs(value);
 }
 
 Player.prototype.getCar = function() {
@@ -57,6 +57,7 @@ Player.prototype.moveCar = function(delta) {
     } else {
         go = -this.getBackward();
     }
+
     this.getCar().turn(turn);
     this.getCar().go(delta, go);
 }
@@ -131,29 +132,31 @@ Controller.prototype.getGamepad = function() {
     return this._gamepad;
 }
 Controller.prototype.updateMovement = function() {
-    if(this.getGamepad().axes[0] < -0.2) {
-        this.setLeft(0);
-        this.setRight(Math.abs(this.getGamepad().axes[0]));
-    } else if(this.getGamepad().axes[0] > 0.2) {
-        this.setLeft(Math.abs(this.getGamepad().axes[0]));
+    var gamepad = this.getGamepad();
+
+    if(gamepad.axes[0] < -0.2) {
+        this.setLeft(gamepad.axes[0]);
         this.setRight(0);
+    } else if(gamepad.axes[0] > 0.2) {
+        this.setLeft(0);
+        this.setRight(gamepad.axes[0]);
     } else {
         this.setLeft(0);
         this.setRight(0);
     }
 
-    if(this.getGamepad().buttons[7].value > 0) {
-        this.setForward(Math.abs(this.getGamepad().buttons[7].value));
+    if(gamepad.buttons[7].value > 0) {
+        this.setForward(gamepad.buttons[7].value);
         this.setBackward(0);
-    } else if(this.getGamepad().buttons[6].value > 0) {
+    } else if(gamepad.buttons[6].value > 0) {
         this.setForward(0);
-        this.setBackward(Math.abs(this.getGamepad().buttons[6].value));
+        this.setBackward(gamepad.buttons[6].value);
     } else {
         this.setForward(0);
         this.setBackward(0);        
     }
 
-    if(this.getGamepad().buttons[0].pressed) {
+    if(gamepad.buttons[0].pressed) {
         this.enableBoost();
     } else {
         this.disableBoost();

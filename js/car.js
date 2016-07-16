@@ -35,7 +35,7 @@ var Car = function(startX, startY) {
     function _getNextX(angle, amount) {
         var xPos = amount * Math.sin(angle);
 
-        return _x + xPos;
+        return _x - xPos;
     }
 
     function _getNextY(angle, amount) {
@@ -52,6 +52,8 @@ var Car = function(startX, startY) {
         } else if(_direction < -(Math.PI * 2)) {
             _direction += Math.PI * 2;
         }
+
+        // console.log(_direction);
     }
 
     function go(delta, amount) {
