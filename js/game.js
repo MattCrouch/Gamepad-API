@@ -8,7 +8,7 @@ var Game = (function(canvas) {
         _addListeners();
         _onResize();
 
-        // _addKeyboard();
+        _addKeyboard();
     }
 
     function _addListeners() {

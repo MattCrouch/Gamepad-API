@@ -91,10 +91,10 @@ Keyboard.prototype.addListeners = function() {
                 self.setBackward(1);
                 break;
             case 37: //Left
-                self.setRight(1);
+                self.setLeft(1);
                 break;
             case 39: //Right
-                self.setLeft(1);
+                self.setRight(1);
                 break;
             case 32: //Space
                 self.enableBoost();
@@ -110,10 +110,10 @@ Keyboard.prototype.addListeners = function() {
                 self.setBackward(0);
                 break;
             case 37: //Left
-                self.setRight(0);
+                self.setLeft(0);
                 break;
             case 39: //Right
-                self.setLeft(0);
+                self.setRight(0);
                 break;
             case 32: //Space
                 self.disableBoost();
@@ -153,7 +153,7 @@ Controller.prototype.updateMovement = function() {
         this.setBackward(gamepad.buttons[6].value);
     } else {
         this.setForward(0);
-        this.setBackward(0);        
+        this.setBackward(0);
     }
 
     if(gamepad.buttons[0].pressed) {
