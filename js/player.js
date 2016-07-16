@@ -1,4 +1,4 @@
-var Controller = function(id, startX, startY) {
+var Player = function(id, startX, startY) {
     this._forward = 0;
     this._backward = 0;
     this._left = 0;
@@ -7,43 +7,43 @@ var Controller = function(id, startX, startY) {
     this._car = new Car(startX, startY);
 }
 
-Controller.prototype.getForward = function() {
+Player.prototype.getForward = function() {
     return this._forward;
 }
 
-Controller.prototype.setForward = function(value) {
+Player.prototype.setForward = function(value) {
     this._forward = value;
 }
 
-Controller.prototype.getBackward = function() {
+Player.prototype.getBackward = function() {
     return this._backward;
 }
 
-Controller.prototype.setBackward = function(value) {
+Player.prototype.setBackward = function(value) {
     this._backward = value;
 }
 
-Controller.prototype.getLeft = function() {
+Player.prototype.getLeft = function() {
     return this._left;
 }
 
-Controller.prototype.setLeft = function(value) {
+Player.prototype.setLeft = function(value) {
     this._left = value;
 }
 
-Controller.prototype.getRight = function() {
+Player.prototype.getRight = function() {
     return this._right;
 }
 
-Controller.prototype.setRight = function(value) {
+Player.prototype.setRight = function(value) {
     this._right = value;
 }
 
-Controller.prototype.getCar = function() {
+Player.prototype.getCar = function() {
     return this._car;
 }
 
-Controller.prototype.moveCar = function(delta) {
+Player.prototype.moveCar = function(delta) {
     var turn = 0;
     if(this.getRight() > 0) {
         turn = this.getRight();
@@ -61,23 +61,23 @@ Controller.prototype.moveCar = function(delta) {
     this.getCar().go(delta, go);
 }
 
-Controller.prototype.getId = function() {
+Player.prototype.getId = function() {
     return this._id;
 }
 
-Controller.prototype.enableBoost = function() {
+Player.prototype.enableBoost = function() {
     this._car.setBoost(true);
 }
 
-Controller.prototype.disableBoost = function() {
+Player.prototype.disableBoost = function() {
     this._car.setBoost(false);
 }
 
 var Keyboard = function(startX, startY) {
-    Controller.call(this, undefined, startX, startY);
+    Player.call(this, undefined, startX, startY);
     this.addListeners();
 }
-Keyboard.prototype = Object.create(Controller.prototype);
+Keyboard.prototype = Object.create(Player.prototype);
 Keyboard.prototype.constructor = Keyboard;
 Keyboard.prototype.addListeners = function() {
     var self = this;
@@ -121,16 +121,16 @@ Keyboard.prototype.addListeners = function() {
     });
 }
 
-var Gamepad = function(gamepad, startX, startY) {
-    Controller.call(this, gamepad.index, startX, startY);
+var Controller = function(gamepad, startX, startY) {
+    Player.call(this, gamepad.index, startX, startY);
     this._gamepad = gamepad;
 }
-Gamepad.prototype = Object.create(Controller.prototype);
-Gamepad.prototype.constructor = Gamepad;
-Gamepad.prototype.getGamepad = function() {
+Controller.prototype = Object.create(Player.prototype);
+Controller.prototype.constructor = Controller;
+Controller.prototype.getGamepad = function() {
     return this._gamepad;
 }
-Gamepad.prototype.updateMovement = function() {
+Controller.prototype.updateMovement = function() {
     if(this.getGamepad().axes[0] < -0.2) {
         this.setLeft(0);
         this.setRight(Math.abs(this.getGamepad().axes[0]));

@@ -24,12 +24,12 @@ var Game = (function(canvas) {
 
     function _onGamepadConnected(e) {
         console.log("connected", e);
-        _addGamepad(e.gamepad);
+        _addController(e.gamepad);
     }
 
     function _onGamepadDisconnected(e) {
         console.log("disconnected", e);
-        _removeGamepad(e.gamepad);
+        _removeController(e.gamepad);
     }
 
     function _addKeyboard() {
@@ -37,16 +37,16 @@ var Game = (function(canvas) {
         _players.push(new Keyboard(_canvas.width / 2, _canvas.height / 2));
     }
 
-    function _addGamepad(gamepad) {
-        console.log("Gamepad added");
-        var controller = new Gamepad(gamepad, _canvas.width / 2, _canvas.height / 2);
+    function _addController(gamepad) {
+        console.log("Controller added");
+        var controller = new Controller(gamepad, _canvas.width / 2, _canvas.height / 2);
         _players.push(controller);
 
         return controller;
     }
 
-    function _removeGamepad(gamepad) {
-        var player = _findGamepad(gamepad.index);
+    function _removeController(gamepad) {
+        var player = _findController(gamepad.index);
 
         if(player) {
             var index = _players.indexOf(player);
@@ -67,7 +67,7 @@ var Game = (function(canvas) {
         _context.restore();
     }
 
-    function _findGamepad(id) {
+    function _findController(id) {
         for(var i = 0; i < _players.length; i++) {
             if(_players[i].getId() === id) {
                 return _players[i];
@@ -92,9 +92,9 @@ var Game = (function(canvas) {
         
         for(var i = 0; i < gamepads.length; i++) {
             if(gamepads[i] !== undefined) {
-                var player = _findGamepad(gamepads[i].index);
+                var player = _findController(gamepads[i].index);
                 if(!player) {
-                    player = _addGamepad(gamepads[i]);
+                    player = _addController(gamepads[i]);
                 }
                 if(player) {
                     player.updateMovement();
