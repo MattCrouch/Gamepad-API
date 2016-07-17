@@ -5,6 +5,15 @@ var Player = function(id, startX, startY) {
     this._right = 0;
     this._id = id;
     this._car = new Car(startX, startY);
+    this._bindings = {
+        left: undefined,
+        right: undefined,
+        forward: undefined,
+        backward: undefined,
+        boost: undefined
+    }
+    this._playerDisplay = undefined;
+    this._bindingListen = {};
 }
 
 Player.prototype.getForward = function() {
@@ -73,53 +82,139 @@ Player.prototype.enableBoost = function() {
 Player.prototype.disableBoost = function() {
     this._car.setBoost(false);
 }
+Player.prototype.addPlayerDisplay = function(playerDescription) {
+    var players = document.getElementById("players");
+    
+    var display = document.createElement("li");
+    
+    var description = document.createElement("div");
+    description.className = "description";
+    description.appendChild(document.createTextNode(playerDescription));
+    display.appendChild(description);
+    
+    var bindings = document.createElement("dl");
+    bindings.className = "bindings";
+    for (var key in this._bindings) {
+        var dt = document.createElement("dt");
+        dt.appendChild(document.createTextNode(key));
+        bindings.appendChild(dt);
+
+        var dd = document.createElement("dd");
+        var input = document.createElement("input");
+        input.setAttribute("type", "text");
+        input.setAttribute("value", this._bindings[key]);
+        input.dataset.binding = key;
+        this._bindingListen[key] = this.startBindingListen.bind(this);
+        input.addEventListener("click", this._bindingListen[key]);
+        dd.appendChild(input);
+        bindings.appendChild(dd);
+    }
+    display.appendChild(bindings);
+
+    players.appendChild(display);
+
+    return display;
+}
+Player.prototype.removePlayerDisplay = function() {
+    if(this._playerDisplay) {
+        this._playerDisplay.parentElement.removeChild(this._playerDisplay);
+        this._playerDisplay = undefined;
+    }
+}
+Player.prototype.startBindingListen = function(e) {
+    console.log("listening...");
+
+    e.target.value = "listening...";
+    e.target.disabled = true;
+
+    this.listenForNewBinding(e.target);
+
+    e.target.removeEventListener("click", this._bindingListen[e.target.dataset.binding]);
+    this._bindingListen[e.target.dataset.binding] = this.endBindingListen.bind(this, e.target);
+    e.target.addEventListener("click", this._bindingListen[e.target.dataset.binding]);
+}
+Player.prototype.recordNewBinding = function(target, binding, value) {
+    this._bindings[binding] = value;
+    this.endBindingListen(target);
+}
+Player.prototype.endBindingListen = function(target) {
+    console.log("stopped listening");
+
+    target.value = this._bindings[target.dataset.binding];
+    target.disabled = false;
+
+    target.removeEventListener("click", this._bindingListen[target.dataset.binding]);
+    this._bindingListen[target.dataset.binding] = this.startBindingListen.bind(this);
+    target.addEventListener("click", this._bindingListen[target.dataset.binding]);
+}
 
 var Keyboard = function(startX, startY) {
     Player.call(this, undefined, startX, startY);
+    this.setDefaultBindings();
     this.addListeners();
+    this._playerDisplay = this.addPlayerDisplay("keyboard");
 }
 Keyboard.prototype = Object.create(Player.prototype);
 Keyboard.prototype.constructor = Keyboard;
+Keyboard.prototype.setDefaultBindings = function() {
+    this._bindings = {
+        left: 37,
+        right: 39,
+        forward: 38,
+        backward: 40,
+        boost: 32
+    }
+}
 Keyboard.prototype.addListeners = function() {
     var self = this;
     window.addEventListener("keydown", function(e) {
         switch(e.which) {
-            case 38: //Up
+            case self._bindings.forward: //Up
                 self.setForward(1);
                 break;
-            case 40: //Down
+            case self._bindings.backward: //Down
                 self.setBackward(1);
                 break;
-            case 37: //Left
+            case self._bindings.left: //Left
                 self.setLeft(1);
                 break;
-            case 39: //Right
+            case self._bindings.right: //Right
                 self.setRight(1);
                 break;
-            case 32: //Space
+            case self._bindings.boost: //Space
                 self.enableBoost();
                 break;
         }
     });
     window.addEventListener("keyup", function(e) {
-        switch(e.keyCode) {
-            case 38: //Up
+        switch(e.which) {
+            case self._bindings.forward: //Up
                 self.setForward(0);
                 break;
-            case 40: //Down
+            case self._bindings.backward: //Down
                 self.setBackward(0);
                 break;
-            case 37: //Left
+            case self._bindings.left: //Left
                 self.setLeft(0);
                 break;
-            case 39: //Right
+            case self._bindings.right: //Right
                 self.setRight(0);
                 break;
-            case 32: //Space
+            case self._bindings.boost: //Space
                 self.disableBoost();
                 break;
         }
     });
+}
+Keyboard.prototype.listenForNewBinding = function(target) {
+    var self = this;
+
+    var onKeyDown = function(e) {
+        self.recordNewBinding(target, target.dataset.binding, e.which);
+        window.removeEventListener("keydown", onKeyDown);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
 }
 
 var Controller = function(gamepad, startX, startY) {

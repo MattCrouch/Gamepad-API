@@ -22,3 +22,41 @@ canvas {
     height: 100%;
     border: 10px solid #83B231;
 }
+
+#players {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+#players li {
+    margin-right: 10px;
+    display: inline-block;
+}
+
+#players .description {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+#players .bindings {
+    margin: 0;
+    overflow: hidden;
+}
+
+#players .bindings dt {
+    float: left;
+    clear: both;
+}
+
+#players .bindings dd {
+    float: right;
+    margin-left: 10px;
+}
+
+#players .bindings dd input {
+    width: 5rem;
+}
