@@ -1,6 +1,6 @@
 var Car = function(startX, startY) {
-    var _x = Number.isInteger(startX) ? startX : 0;
-    var _y = Number.isInteger(startY) ? startY : 0;
+    var _x = !isNaN(startX) ? startX : 0;
+    var _y = !isNaN(startY) ? startY : 0;
     var _direction = 0;
     var _driveSpeed = 1;
     var _turnSpeed = 0.05;
