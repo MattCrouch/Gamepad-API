@@ -90,6 +90,7 @@ Player.prototype.addPlayerDisplay = function(playerDescription) {
     var description = document.createElement("div");
     description.className = "description";
     description.appendChild(document.createTextNode(playerDescription));
+    description.appendChild(this.getCar().getImage());
     display.appendChild(description);
     
     var bindings = document.createElement("dl");
@@ -100,18 +101,16 @@ Player.prototype.addPlayerDisplay = function(playerDescription) {
         bindings.appendChild(dt);
 
         var dd = document.createElement("dd");
-        var input = document.createElement("input");
-        input.setAttribute("type", "text");
-        console.log(typeof this._bindings[key]);
+        var button = document.createElement("button");
         if(typeof this._bindings[key] == "object") {
-            input.value = this._bindings[key].type + "[" + this._bindings[key].index + "]";
+            button.innerText = this._bindings[key].type + "[" + this._bindings[key].index + "]";
         } else {
-            input.value = this._bindings[key];
+           button.innerText = this._bindings[key];
         }
-        input.dataset.binding = key;
+        button.dataset.binding = key;
         this._bindingListen[key] = this.startBindingListen.bind(this);
-        input.addEventListener("click", this._bindingListen[key]);
-        dd.appendChild(input);
+        button.addEventListener("click", this._bindingListen[key]);
+        dd.appendChild(button);
         bindings.appendChild(dd);
     }
     display.appendChild(bindings);
@@ -129,7 +128,7 @@ Player.prototype.removePlayerDisplay = function() {
 Player.prototype.startBindingListen = function(e) {
     console.log("listening...");
 
-    e.target.value = "listening...";
+    e.target.innerText = "listening...";
     e.target.disabled = true;
 
     this.listenForNewBinding(e.target);
@@ -139,7 +138,6 @@ Player.prototype.startBindingListen = function(e) {
     e.target.addEventListener("click", this._bindingListen[e.target.dataset.binding]);
 }
 Player.prototype.recordNewBinding = function(target, binding, value) {
-    console.log(binding, value);
     this._bindings[binding] = value;
     this.endBindingListen(target);
 }
@@ -147,9 +145,9 @@ Player.prototype.endBindingListen = function(target) {
     console.log("stopped listening");
 
     if(typeof this._bindings[target.dataset.binding] == "object") {
-        target.value = this._bindings[target.dataset.binding].type + "[" + this._bindings[target.dataset.binding].index + "]";
+        target.innerText = this._bindings[target.dataset.binding].type + "[" + this._bindings[target.dataset.binding].index + "]";
     } else {
-        target.value = this._bindings[target.dataset.binding];
+        target.innerText = this._bindings[target.dataset.binding];
     }
     target.disabled = false;
 
@@ -162,7 +160,7 @@ var Keyboard = function(startX, startY) {
     Player.call(this, undefined, startX, startY);
     this.setDefaultBindings();
     this.addListeners();
-    this._playerDisplay = this.addPlayerDisplay("keyboard");
+    this._playerDisplay = this.addPlayerDisplay("Keyboard");
 }
 Keyboard.prototype = Object.create(Player.prototype);
 Keyboard.prototype.constructor = Keyboard;
@@ -231,7 +229,7 @@ var Controller = function(gamepad, startX, startY) {
     Player.call(this, gamepad.index, startX, startY);
     this._gamepad = gamepad;
     this.setDefaultBindings();
-    this._playerDisplay = this.addPlayerDisplay("controller");
+    this._playerDisplay = this.addPlayerDisplay("Controller");
 }
 Controller.prototype = Object.create(Player.prototype);
 Controller.prototype.constructor = Controller;
@@ -373,7 +371,7 @@ Controller.prototype.listenForNewBinding = function(target) {
                 break;
             }
         }
-        
+
         if(!found) {
             for(button in gamepad.buttons) {
                 if(gamepad.buttons[button].pressed) {
