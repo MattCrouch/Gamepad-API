@@ -117,8 +117,6 @@ var Game = (function(canvas) {
             heading.appendChild(warning);
         }
 
-        console.log(supports);
-
         return supports;
     }
 
