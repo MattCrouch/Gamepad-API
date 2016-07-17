@@ -4,47 +4,86 @@ var Game = (function(canvas) {
     var _lastUpdate;
     var _players = [];
 
+    /**
+     * Initialise the game
+     */
     function _init() {
         _addListeners();
         _onResize();
 
         _addKeyboard();
+
+        _loop();
     }
 
+    /**
+     * Add listeners to control Gamepad interaction
+     */
     function _addListeners() {
         window.addEventListener("resize", _onResize);
         window.addEventListener("gamepadconnected", _onGamepadConnected);
         window.addEventListener("gamepaddisconnected", _onGamepadDisconnected);
     }
 
-    function _onResize() {
+    /**
+     * Adjusts the canvas height and width on window resize
+     *
+     * @param {Event} e
+     */
+    function _onResize(e) {
         _canvas.width = window.innerWidth;
         _canvas.height = window.innerHeight;
     }
 
+    /**
+     * Adds a controller when a gamepad is connected
+     *
+     * @param {Event} e
+     */
     function _onGamepadConnected(e) {
-        console.log("connected", e);
         _addController(e.gamepad);
     }
 
+    /**
+     * Removes a controller when a gamepad is connected
+     *
+     * @param {Event} e
+     */
     function _onGamepadDisconnected(e) {
-        console.log("disconnected", e);
         _removeController(e.gamepad);
     }
 
+    /**
+     * Enables keyboard interaction
+     *
+     * @return {Keyboard} keyboard;
+     */
     function _addKeyboard() {
-        console.log("Keyboard added");
-        _players.push(new Keyboard(_canvas.width / 2, _canvas.height / 2));
+        var keyboard = new Keyboard(_canvas.width / 2, _canvas.height / 2);
+        _players.push(keyboard);
+
+        return keyboard;
     }
 
+    /**
+     * Enables controller interaction
+     *
+     * @param {Gamepad} gamepad;
+     * @return {Controller} controller;
+     */
     function _addController(gamepad) {
-        console.log("Controller added");
         var controller = new Controller(gamepad, _canvas.width / 2, _canvas.height / 2);
         _players.push(controller);
 
         return controller;
     }
 
+    /**
+     * Removes a controller
+     *
+     * @param {Gamepad} gamepad;
+     * @return {Keyboard} keyboard;
+     */
     function _removeController(gamepad) {
         var player = _findController(gamepad.index);
 
@@ -53,23 +92,39 @@ var Game = (function(canvas) {
             var index = _players.indexOf(player);
             
             _players.splice(index, 1);
-
-            
         }
     }
 
+    /**
+     * Renders a car on the canvas
+     *
+     * @param {Car} car;
+     */
     function _drawCar(car) {
+        //Saves the current canvas context to return to normal later
         _context.save();
+
+        //Adjust the canvas to display the position/orientation of the car 
         _context.translate(car.getX(), car.getY());
         _context.rotate(car.getDirection());
+
+        //Render the car itself if it has loaded
         if(car.getImage().complete) {
             var length = 150;
             var width = car.getImage().width / (car.getImage().height / length);
             _context.drawImage(car.getImage(), -(width / 2), -(length / 2), width, length);
         }
+        
+        //Restore the default position/orientation of the canvas context
         _context.restore();
     }
 
+    /**
+     * Finds a Controller object based on a Gamepad id
+     *
+     * @param {Integer} id;
+     * @return {Controller} controller;
+     */
     function _findController(id) {
         for(var i = 0; i < _players.length; i++) {
             if(_players[i].getId() === id) {
@@ -80,17 +135,25 @@ var Game = (function(canvas) {
         return undefined;
     }
 
+    /**
+     * Cleans the canvas
+     */
     function _clearCanvas() {
         _context.clearRect(0, 0, _canvas.width, _canvas.height);
     }
 
+    /**
+     * Computes each frame
+     */
     function _loop() {
+        //Compute the frame rate
         var delta = 0;
         if(_lastUpdate !== undefined) {
             delta = window.performance.now() - _lastUpdate;
         }
         _lastUpdate = window.performance.now();
 
+        //Loop through each gamepad and update it's inputs
         var gamepads = navigator.getGamepads();
         
         for(var i = 0; i < gamepads.length; i++) {
@@ -100,31 +163,32 @@ var Game = (function(canvas) {
                     player = _addController(gamepads[i]);
                 }
                 if(player) {
+                    //Update the Gamepad object for Edge
                     player.setGamepad(gamepads[i]);
+                    
+                    //Update player movements based on current state
                     player.updateMovement();
                 }
             }
         }
-
-        /*for(var i = 0; i < _players.length; i++) {
-            _players[i].updateMovement();
-        }*/
 
         _clearCanvas();
         _update(delta);
         requestAnimationFrame(_loop);
     }
 
+    /**
+     * Updates each frame
+     *
+     * @param {Float} delta;
+     */
     function _update(delta) {
         for(var i = 0; i < _players.length; i++) {
             _players[i].moveCar(delta);
-            // _players[i].getCar().turn(Math.random() * (Math.PI * 2));
-            // _players[i].getCar().go(Math.random() * 10);
             _players[i].getCar().checkBounds(_canvas.width, _canvas.height);
             _drawCar(_players[i].getCar());
         }
     }
 
     _init();
-    _loop();
 })(document.getElementById("game"));

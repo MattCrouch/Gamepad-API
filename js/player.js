@@ -1,3 +1,10 @@
+/**
+ * Holds basic control instructions for each car
+ *
+ * @param {String} id
+ * @param {Float} startX
+ * @param {Float} startY
+ */
 var Player = function(id, startX, startY) {
     this._forward = 0;
     this._backward = 0;
@@ -10,42 +17,96 @@ var Player = function(id, startX, startY) {
     this._mappingListen = {};
 }
 
+/**
+ * Returns current forward value
+ *
+ * @return {Float} _forward
+ */
 Player.prototype.getForward = function() {
     return this._forward;
 }
 
+/**
+ * Sets forward value
+ *
+ * @param {Float} value
+ */
 Player.prototype.setForward = function(value) {
     this._forward = Math.abs(value);
 }
 
+/**
+ * Returns current backward value
+ *
+ * @return {Float} _backward
+ */
 Player.prototype.getBackward = function() {
     return this._backward;
 }
 
+/**
+ * Sets backward value
+ *
+ * @param {Float} value
+ */
 Player.prototype.setBackward = function(value) {
     this._backward = Math.abs(value);
 }
 
+/**
+ * Returns current left turn value
+ *
+ * @return {Float} _left
+ */
 Player.prototype.getLeft = function() {
     return this._left;
 }
 
+/**
+ * Sets left turn value
+ *
+ * @param {Float} value
+ */
 Player.prototype.setLeft = function(value) {
     this._left = Math.abs(value);
 }
 
+/**
+ * Returns current right turn value
+ *
+ * @return {Float} _right
+ */
 Player.prototype.getRight = function() {
     return this._right;
 }
 
+/**
+ * Sets right turn value
+ *
+ * @param {Float} value
+ */
 Player.prototype.setRight = function(value) {
     this._right = Math.abs(value);
 }
 
+/**
+ * Returns the car object for this player
+ *
+ * @return {Car} _car
+ */
 Player.prototype.getCar = function() {
     return this._car;
 }
 
+/**
+ * Moves the car in canvas co-ordinates
+ * based on input instructions
+ * offset by the frame rate delta
+ *
+ * @param {Float} delta
+ * @param {Float} startX
+ * @param {Float} startY
+ */
 Player.prototype.moveCar = function(delta) {
     var turn = 0;
     if(this.getRight() > 0) {
@@ -65,36 +126,59 @@ Player.prototype.moveCar = function(delta) {
     this.getCar().go(delta, go);
 }
 
+/**
+ * Returns the id for this player
+ *
+ * @return {String} _id
+ */
 Player.prototype.getId = function() {
     return this._id;
 }
 
+/**
+ * Enables the car boost
+ */
 Player.prototype.enableBoost = function() {
     this._car.setBoost(true);
 }
 
+/**
+ * Disables the car boost
+ */
 Player.prototype.disableBoost = function() {
     this._car.setBoost(false);
 }
+
+/**
+ * Creates and inserts the display element for this player
+ * Optionally shows input mapping options if set up
+ *
+ * @param {String} playerDescription
+ */
 Player.prototype.addPlayerDisplay = function(playerDescription) {
     var players = document.getElementById("players");
     
+    //Create a container for the display
     var display = document.createElement("li");
     
+    //Show a brief description of the player
     var description = document.createElement("div");
     description.className = "description";
     description.appendChild(document.createTextNode(playerDescription));
     description.appendChild(this.getCar().getImage());
     display.appendChild(description);
     
+    //If custom mappings are enabled, show the buttons to remap them
     if(typeof this._mappings !== "undefined") {
         var bindings = document.createElement("dl");
         bindings.className = "bindings";
         for (var key in this._mappings) {
+            //Input description
             var dt = document.createElement("dt");
             dt.appendChild(document.createTextNode(key));
             bindings.appendChild(dt);
 
+            //Input mapping
             var dd = document.createElement("dd");
             var button = document.createElement("button");
             if(typeof this._mappings[key] == "object") {
@@ -103,11 +187,16 @@ Player.prototype.addPlayerDisplay = function(playerDescription) {
             button.innerText = this._mappings[key];
             }
             button.dataset.binding = key;
-            this._mappingListen[key] = this.startBindingListen.bind(this);
+            
+            //Add listener for mapping change
+            this._mappingListen[key] = this.startMappingListen.bind(this);
             button.addEventListener("click", this._mappingListen[key]);
+
+            //Add to display
             dd.appendChild(button);
             bindings.appendChild(dd);
         }
+
         display.appendChild(bindings);
     }
 
@@ -115,27 +204,53 @@ Player.prototype.addPlayerDisplay = function(playerDescription) {
 
     return display;
 }
+
+/**
+ * Removes the display element from view
+ */
 Player.prototype.removePlayerDisplay = function() {
     if(this._playerDisplay) {
         this._playerDisplay.parentElement.removeChild(this._playerDisplay);
         this._playerDisplay = undefined;
     }
 }
-Player.prototype.startBindingListen = function(e) {
+
+/**
+ * Enables the input mapping mode
+ *
+ * @param {Event} e
+ */
+Player.prototype.startMappingListen = function(e) {
     e.target.innerText = "listening...";
     e.target.disabled = true;
 
-    this.listenForNewBinding(e.target);
+    this.listenForNewMapping(e.target);
 
+    //Repeated click on the button would cancel remapping, not create another listener
     e.target.removeEventListener("click", this._mappingListen[e.target.dataset.binding]);
-    this._mappingListen[e.target.dataset.binding] = this.endBindingListen.bind(this, e.target);
+    this._mappingListen[e.target.dataset.binding] = this.endMappingListen.bind(this, e.target);
     e.target.addEventListener("click", this._mappingListen[e.target.dataset.binding]);
 }
-Player.prototype.recordNewBinding = function(target, binding, value) {
+
+/**
+ * Assigns the new input mapping to the player
+ *
+ * @param {Element} target
+ * @param {String} binding
+ * @param {String} value
+ */
+Player.prototype.recordNewMapping = function(target, binding, value) {
     this._mappings[binding] = value;
-    this.endBindingListen(target);
+    this.endMappingListen(target);
 }
-Player.prototype.endBindingListen = function(target) {
+
+/**
+ * Stops listening for new mapping
+ * and adjusts the view accordingly
+ *
+ * @param {Element} target
+ */
+Player.prototype.endMappingListen = function(target) {
     if(typeof this._mappings[target.dataset.binding] == "object") {
         target.innerText = this._mappings[target.dataset.binding].type + "[" + this._mappings[target.dataset.binding].index + "]";
     } else {
@@ -143,19 +258,28 @@ Player.prototype.endBindingListen = function(target) {
     }
     target.disabled = false;
 
+    //Set mapping back to default state
     target.removeEventListener("click", this._mappingListen[target.dataset.binding]);
-    this._mappingListen[target.dataset.binding] = this.startBindingListen.bind(this);
+    this._mappingListen[target.dataset.binding] = this.startMappingListen.bind(this);
     target.addEventListener("click", this._mappingListen[target.dataset.binding]);
 }
 
+/**
+ * Holds special interpretations for keyboard input 
+ *
+ * @param {Float} startX
+ * @param {Float} startY
+ */
 var Keyboard = function(startX, startY) {
     Player.call(this, undefined, startX, startY);
-    this.setDefaultMappings();
-    this.addListeners();
-    this._playerDisplay = this.addPlayerDisplay("Keyboard");
+    this.init();
 }
 Keyboard.prototype = Object.create(Player.prototype);
 Keyboard.prototype.constructor = Keyboard;
+
+/**
+ * Sets up default key mapping for keyboard input
+ */
 Keyboard.prototype.setDefaultMappings = function() {
     this._mappings = {
         left: 37,
@@ -165,72 +289,111 @@ Keyboard.prototype.setDefaultMappings = function() {
         boost: 32
     }
 }
+
+/**
+ * Create listeners for keypresses
+ * to control the car
+ */
 Keyboard.prototype.addListeners = function() {
     var self = this;
     window.addEventListener("keydown", function(e) {
         switch(e.which) {
-            case self._mappings.forward: //Up
+            case self._mappings.forward:
                 self.setForward(1);
                 break;
-            case self._mappings.backward: //Down
+            case self._mappings.backward:
                 self.setBackward(1);
                 break;
-            case self._mappings.left: //Left
+            case self._mappings.left:
                 self.setLeft(1);
                 break;
-            case self._mappings.right: //Right
+            case self._mappings.right:
                 self.setRight(1);
                 break;
-            case self._mappings.boost: //Space
+            case self._mappings.boost:
                 self.enableBoost();
                 break;
         }
     });
     window.addEventListener("keyup", function(e) {
         switch(e.which) {
-            case self._mappings.forward: //Up
+            case self._mappings.forward:
                 self.setForward(0);
                 break;
-            case self._mappings.backward: //Down
+            case self._mappings.backward:
                 self.setBackward(0);
                 break;
-            case self._mappings.left: //Left
+            case self._mappings.left:
                 self.setLeft(0);
                 break;
-            case self._mappings.right: //Right
+            case self._mappings.right:
                 self.setRight(0);
                 break;
-            case self._mappings.boost: //Space
+            case self._mappings.boost:
                 self.disableBoost();
                 break;
         }
     });
 }
-Keyboard.prototype.listenForNewBinding = function(target) {
+
+/**
+ * Captures input to create the new mapping for an input
+ *
+ * @param {Element} target
+ */
+Keyboard.prototype.listenForNewMapping = function(target) {
     var self = this;
 
+    //Create a separate function so we can remove the listener later
     var onKeyDown = function(e) {
-        self.recordNewBinding(target, target.dataset.binding, e.which);
+        self.recordNewMapping(target, target.dataset.binding, e.which);
         window.removeEventListener("keydown", onKeyDown);
     };
 
     window.addEventListener("keydown", onKeyDown);
 }
 
+/**
+ * Holds special interpretations for gamepad input 
+ *
+ * @param {Gamepad} gamepad
+ * @param {Float} startX
+ * @param {Float} startY
+ */
 var Controller = function(gamepad, startX, startY) {
     Player.call(this, gamepad.index, startX, startY);
-    this._gamepad = gamepad;
-    this.setDefaultMappings();
-    this._playerDisplay = this.addPlayerDisplay("Controller");
+    this.init(gamepad);
 }
 Controller.prototype = Object.create(Player.prototype);
 Controller.prototype.constructor = Controller;
+
+/**
+ * Returns the associated Gamepad object for this controller
+ *
+ * @return {Gamepad} _gamepad
+ */
 Controller.prototype.getGamepad = function() {
     return this._gamepad;
 }
+
+/**
+ * Sets the Gamepad object for this controller 
+ *
+ * @param {Gamepad} gamepad
+ */
 Controller.prototype.setGamepad = function(gamepad) {
     this._gamepad = gamepad;
 }
+
+/**
+ * Interprets both axes and button inputs
+ * to determine whether they are active or not 
+ *
+ * @param {String} action
+ * @param {Boolean} asBoolean
+ * @return {Float} value
+ * @return {Boolean} value
+ */
 Controller.prototype.getValue = function(action, asBoolean) {
     if(typeof asBoolean === "undefined") {
         var asBoolean = false;
@@ -239,6 +402,7 @@ Controller.prototype.getValue = function(action, asBoolean) {
     var binding = this._mappings[action];
     var gamepad = this.getGamepad();
 
+    //Check all the right bits have been set
     if(!gamepad || !binding || (binding.type != "axes" && binding.type != "buttons")) {
         throw new Error("Gamepad not defined");
     } else if(!binding) {
@@ -249,6 +413,7 @@ Controller.prototype.getValue = function(action, asBoolean) {
     
     if(binding.type == "axes") {
         if(binding.threshold > 0) {
+            //Movement is towards the positive side
             if(gamepad["axes"][binding.index] > binding.threshold) {
                 if(asBoolean) {
                     return true;
@@ -263,6 +428,7 @@ Controller.prototype.getValue = function(action, asBoolean) {
                 }
             }
         } else {
+            //Movement is towards the negative side
             if(gamepad["axes"][binding.index] < binding.threshold) {
                 if(asBoolean) {
                     return true;
@@ -285,37 +451,10 @@ Controller.prototype.getValue = function(action, asBoolean) {
         }
     }
 };
-Controller.prototype.updateMovement = function() {
-    var gamepad = this.getGamepad();
 
-    if(this.getValue("left", true)) {
-        this.setLeft(this.getValue("left"));
-        this.setRight(0);
-    } else if(this.getValue("right", true)) {
-        this.setLeft(0);
-        this.setRight(this.getValue("right"));
-    } else {
-        this.setLeft(0);
-        this.setRight(0);
-    }
-
-    if(this.getValue("forward", true)) {
-        this.setForward(this.getValue("forward"));
-        this.setBackward(0);
-    } else if(this.getValue("backward", true)) {
-        this.setForward(0);
-        this.setBackward(this.getValue("backward"));
-    } else {
-        this.setForward(0);
-        this.setBackward(0);
-    }
-
-    if(this.getValue("boost", true)) {
-        this.enableBoost();
-    } else {
-        this.disableBoost();
-    }
-}
+/**
+ * Sets the default mapping for a controller input
+ */
 Controller.prototype.setDefaultMappings = function() {
     this._mappings = {
         left: {
@@ -342,7 +481,13 @@ Controller.prototype.setDefaultMappings = function() {
         }
     }
 }
-Controller.prototype.listenForNewBinding = function(target) {
+
+/**
+ * Captures input to create the new mapping for an input
+ *
+ * @param {Element} target
+ */
+Controller.prototype.listenForNewMapping = function(target) {
     var self = this;
 
     //Take a snapshot of current input state
@@ -350,7 +495,6 @@ Controller.prototype.listenForNewBinding = function(target) {
         axes: {},
         buttons: {}
     }
-
     for(axis in this.getGamepad().axes) {
         startState.axes[axis] = this.getGamepad().axes[axis];
     }
@@ -358,15 +502,19 @@ Controller.prototype.listenForNewBinding = function(target) {
         startState.buttons[button] = this.getGamepad().buttons[button].value;
     }
 
+    //Create a function to loop over until we find a matdh
     function bindingPoll() {
-        var gamepad = self.getGamepad(); //Captured here so Edge gets the latest data
+        //Capture gamepad inside function so Edge gets the latest data
+        var gamepad = self.getGamepad();
         var found = false;
+
+        //Check axis changes first...
         for(axis in gamepad.axes) {
             var difference = Math.abs(gamepad.axes[axis] - startState.axes[axis]);
             if(difference > 0.5) {
                 if(gamepad.axes[axis] < -0.2) {
                     found = true;
-                    self.recordNewBinding(target, target.dataset.binding, {
+                    self.recordNewMapping(target, target.dataset.binding, {
                         type: "axes",
                         index: axis,
                         threshold: -0.2
@@ -374,7 +522,7 @@ Controller.prototype.listenForNewBinding = function(target) {
                     break;
                 } else if(gamepad.axes[axis] > 0.2) {
                     found = true;
-                    self.recordNewBinding(target, target.dataset.binding, {
+                    self.recordNewMapping(target, target.dataset.binding, {
                         type: "axes",
                         index: axis,
                         threshold: 0.2
@@ -384,12 +532,13 @@ Controller.prototype.listenForNewBinding = function(target) {
             }
         }
 
+        //...then check button changes...
         if(!found) {
             for(button in gamepad.buttons) {
                 var difference = Math.abs(gamepad.buttons[button].value - startState.buttons[button]);
                 if(difference > 0.5) {
                     found = true;
-                    self.recordNewBinding(target, target.dataset.binding, {
+                    self.recordNewMapping(target, target.dataset.binding, {
                         type: "buttons",
                         index: button
                     });
@@ -398,6 +547,7 @@ Controller.prototype.listenForNewBinding = function(target) {
             }
         }
 
+        //...then if no changes, try again next frame.
         if(!found) {
             requestAnimationFrame(bindingPoll);
         }
