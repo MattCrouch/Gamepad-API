@@ -30,6 +30,10 @@ canvas {
     text-align: center;
 }
 
+#heading .warning {
+    color: red;
+}
+
 #players {
     position: absolute;
     bottom: 10px;

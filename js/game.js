@@ -11,6 +11,7 @@ var Game = (function(canvas) {
         _addListeners();
         _onResize();
 
+        _checkGamepadSupport();
         _addKeyboard();
 
         _loop();
@@ -96,6 +97,32 @@ var Game = (function(canvas) {
     }
 
     /**
+     * Displays a warning if the browser does not support the Gamepad API
+     *
+     * @return {Boolean} supports;
+     */
+    function _checkGamepadSupport() {
+        var supports = false;
+
+        if(navigator.getGamepads) {
+            supports = true;
+        }
+
+        if(!supports) {
+            var heading = document.getElementById("heading");
+            var warning = document.createElement("h4");
+            warning.className = "warning";
+            warning.innerText = "Your browser does not support the Gamepad API";
+
+            heading.appendChild(warning);
+        }
+
+        console.log(supports);
+
+        return supports;
+    }
+
+    /**
      * Renders a car on the canvas
      *
      * @param {Car} car;
@@ -154,20 +181,22 @@ var Game = (function(canvas) {
         _lastUpdate = window.performance.now();
 
         //Loop through each gamepad and update it's inputs
-        var gamepads = navigator.getGamepads();
-        
-        for(var i = 0; i < gamepads.length; i++) {
-            if(gamepads[i] !== undefined) {
-                var player = _findController(gamepads[i].index);
-                if(!player) {
-                    player = _addController(gamepads[i]);
-                }
-                if(player) {
-                    //Update the Gamepad object for Edge
-                    player.setGamepad(gamepads[i]);
-                    
-                    //Update player movements based on current state
-                    player.updateMovement();
+        if(navigator.getGamepads) {
+            var gamepads = navigator.getGamepads();
+            
+            for(var i = 0; i < gamepads.length; i++) {
+                if(gamepads[i] !== undefined) {
+                    var player = _findController(gamepads[i].index);
+                    if(!player) {
+                        player = _addController(gamepads[i]);
+                    }
+                    if(player) {
+                        //Update the Gamepad object for Edge
+                        player.setGamepad(gamepads[i]);
+                        
+                        //Update player movements based on current state
+                        player.updateMovement();
+                    }
                 }
             }
         }
