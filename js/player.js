@@ -5,7 +5,7 @@ var Player = function(id, startX, startY) {
     this._right = 0;
     this._id = id;
     this._car = new Car(startX, startY);
-    this._bindings = {
+    this._mappings = {
         left: undefined,
         right: undefined,
         forward: undefined,
@@ -13,7 +13,7 @@ var Player = function(id, startX, startY) {
         boost: undefined
     }
     this._playerDisplay = undefined;
-    this._bindingListen = {};
+    this._mappingListen = {};
 }
 
 Player.prototype.getForward = function() {
@@ -95,21 +95,21 @@ Player.prototype.addPlayerDisplay = function(playerDescription) {
     
     var bindings = document.createElement("dl");
     bindings.className = "bindings";
-    for (var key in this._bindings) {
+    for (var key in this._mappings) {
         var dt = document.createElement("dt");
         dt.appendChild(document.createTextNode(key));
         bindings.appendChild(dt);
 
         var dd = document.createElement("dd");
         var button = document.createElement("button");
-        if(typeof this._bindings[key] == "object") {
-            button.innerText = this._bindings[key].type + "[" + this._bindings[key].index + "]";
+        if(typeof this._mappings[key] == "object") {
+            button.innerText = this._mappings[key].type + "[" + this._mappings[key].index + "]";
         } else {
-           button.innerText = this._bindings[key];
+           button.innerText = this._mappings[key];
         }
         button.dataset.binding = key;
-        this._bindingListen[key] = this.startBindingListen.bind(this);
-        button.addEventListener("click", this._bindingListen[key]);
+        this._mappingListen[key] = this.startBindingListen.bind(this);
+        button.addEventListener("click", this._mappingListen[key]);
         dd.appendChild(button);
         bindings.appendChild(dd);
     }
@@ -126,46 +126,42 @@ Player.prototype.removePlayerDisplay = function() {
     }
 }
 Player.prototype.startBindingListen = function(e) {
-    console.log("listening...");
-
     e.target.innerText = "listening...";
     e.target.disabled = true;
 
     this.listenForNewBinding(e.target);
 
-    e.target.removeEventListener("click", this._bindingListen[e.target.dataset.binding]);
-    this._bindingListen[e.target.dataset.binding] = this.endBindingListen.bind(this, e.target);
-    e.target.addEventListener("click", this._bindingListen[e.target.dataset.binding]);
+    e.target.removeEventListener("click", this._mappingListen[e.target.dataset.binding]);
+    this._mappingListen[e.target.dataset.binding] = this.endBindingListen.bind(this, e.target);
+    e.target.addEventListener("click", this._mappingListen[e.target.dataset.binding]);
 }
 Player.prototype.recordNewBinding = function(target, binding, value) {
-    this._bindings[binding] = value;
+    this._mappings[binding] = value;
     this.endBindingListen(target);
 }
 Player.prototype.endBindingListen = function(target) {
-    console.log("stopped listening");
-
-    if(typeof this._bindings[target.dataset.binding] == "object") {
-        target.innerText = this._bindings[target.dataset.binding].type + "[" + this._bindings[target.dataset.binding].index + "]";
+    if(typeof this._mappings[target.dataset.binding] == "object") {
+        target.innerText = this._mappings[target.dataset.binding].type + "[" + this._mappings[target.dataset.binding].index + "]";
     } else {
-        target.innerText = this._bindings[target.dataset.binding];
+        target.innerText = this._mappings[target.dataset.binding];
     }
     target.disabled = false;
 
-    target.removeEventListener("click", this._bindingListen[target.dataset.binding]);
-    this._bindingListen[target.dataset.binding] = this.startBindingListen.bind(this);
-    target.addEventListener("click", this._bindingListen[target.dataset.binding]);
+    target.removeEventListener("click", this._mappingListen[target.dataset.binding]);
+    this._mappingListen[target.dataset.binding] = this.startBindingListen.bind(this);
+    target.addEventListener("click", this._mappingListen[target.dataset.binding]);
 }
 
 var Keyboard = function(startX, startY) {
     Player.call(this, undefined, startX, startY);
-    this.setDefaultBindings();
+    this.setDefaultMappings();
     this.addListeners();
     this._playerDisplay = this.addPlayerDisplay("Keyboard");
 }
 Keyboard.prototype = Object.create(Player.prototype);
 Keyboard.prototype.constructor = Keyboard;
-Keyboard.prototype.setDefaultBindings = function() {
-    this._bindings = {
+Keyboard.prototype.setDefaultMappings = function() {
+    this._mappings = {
         left: 37,
         right: 39,
         forward: 38,
@@ -177,38 +173,38 @@ Keyboard.prototype.addListeners = function() {
     var self = this;
     window.addEventListener("keydown", function(e) {
         switch(e.which) {
-            case self._bindings.forward: //Up
+            case self._mappings.forward: //Up
                 self.setForward(1);
                 break;
-            case self._bindings.backward: //Down
+            case self._mappings.backward: //Down
                 self.setBackward(1);
                 break;
-            case self._bindings.left: //Left
+            case self._mappings.left: //Left
                 self.setLeft(1);
                 break;
-            case self._bindings.right: //Right
+            case self._mappings.right: //Right
                 self.setRight(1);
                 break;
-            case self._bindings.boost: //Space
+            case self._mappings.boost: //Space
                 self.enableBoost();
                 break;
         }
     });
     window.addEventListener("keyup", function(e) {
         switch(e.which) {
-            case self._bindings.forward: //Up
+            case self._mappings.forward: //Up
                 self.setForward(0);
                 break;
-            case self._bindings.backward: //Down
+            case self._mappings.backward: //Down
                 self.setBackward(0);
                 break;
-            case self._bindings.left: //Left
+            case self._mappings.left: //Left
                 self.setLeft(0);
                 break;
-            case self._bindings.right: //Right
+            case self._mappings.right: //Right
                 self.setRight(0);
                 break;
-            case self._bindings.boost: //Space
+            case self._mappings.boost: //Space
                 self.disableBoost();
                 break;
         }
@@ -228,7 +224,7 @@ Keyboard.prototype.listenForNewBinding = function(target) {
 var Controller = function(gamepad, startX, startY) {
     Player.call(this, gamepad.index, startX, startY);
     this._gamepad = gamepad;
-    this.setDefaultBindings();
+    this.setDefaultMappings();
     this._playerDisplay = this.addPlayerDisplay("Controller");
 }
 Controller.prototype = Object.create(Player.prototype);
@@ -244,7 +240,7 @@ Controller.prototype.getValue = function(action, asBoolean) {
         var asBoolean = false;
     }
 
-    var binding = this._bindings[action];
+    var binding = this._mappings[action];
     var gamepad = this.getGamepad();
 
     if(!gamepad || !binding || (binding.type != "axes" && binding.type != "buttons")) {
@@ -324,8 +320,8 @@ Controller.prototype.updateMovement = function() {
         this.disableBoost();
     }
 }
-Controller.prototype.setDefaultBindings = function() {
-    this._bindings = {
+Controller.prototype.setDefaultMappings = function() {
+    this._mappings = {
         left: {
             type: "axes",
             index: 0,
@@ -365,8 +361,6 @@ Controller.prototype.listenForNewBinding = function(target) {
     for(button in this.getGamepad().buttons) {
         startState.buttons[button] = this.getGamepad().buttons[button].value;
     }
-
-    console.log(startState);
 
     function bindingPoll() {
         var gamepad = self.getGamepad(); //Captured here so Edge gets the latest data
