@@ -24,6 +24,12 @@ canvas {
     border: 10px solid #83B231;
 }
 
+#heading {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+}
+
 #players {
     position: absolute;
     bottom: 10px;
