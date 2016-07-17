@@ -100,6 +100,7 @@ var Game = (function(canvas) {
                     player = _addController(gamepads[i]);
                 }
                 if(player) {
+                    player.setGamepad(gamepads[i]);
                     player.updateMovement();
                 }
             }

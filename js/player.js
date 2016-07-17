@@ -236,6 +236,9 @@ Controller.prototype.constructor = Controller;
 Controller.prototype.getGamepad = function() {
     return this._gamepad;
 }
+Controller.prototype.setGamepad = function(gamepad) {
+    this._gamepad = gamepad;
+}
 Controller.prototype.getValue = function(action, asBoolean) {
     if(typeof asBoolean === "undefined") {
         var asBoolean = false;
@@ -349,7 +352,6 @@ Controller.prototype.setDefaultBindings = function() {
 }
 Controller.prototype.listenForNewBinding = function(target) {
     var self = this;
-    var gamepad = this.getGamepad();
 
     //Take a snapshot of current input state
     var startState = {
@@ -357,16 +359,17 @@ Controller.prototype.listenForNewBinding = function(target) {
         buttons: {}
     }
 
-    for(axis in gamepad.axes) {
-        startState.axes[axis] = gamepad.axes[axis];
+    for(axis in this.getGamepad().axes) {
+        startState.axes[axis] = this.getGamepad().axes[axis];
     }
-    for(button in gamepad.buttons) {
-        startState.buttons[button] = gamepad.buttons[button].value;
+    for(button in this.getGamepad().buttons) {
+        startState.buttons[button] = this.getGamepad().buttons[button].value;
     }
 
     console.log(startState);
 
     function bindingPoll() {
+        var gamepad = self.getGamepad(); //Captured here so Edge gets the latest data
         var found = false;
         for(axis in gamepad.axes) {
             var difference = Math.abs(gamepad.axes[axis] - startState.axes[axis]);
