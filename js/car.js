@@ -114,7 +114,7 @@ var Car = function(startX, startY) {
 
         //Offset for frame rate
         speed *= delta;
-        
+
         _x = _getNextX(angle, amount * speed);
         _y = _getNextY(angle, amount * speed);
     }
@@ -145,7 +145,7 @@ var Car = function(startX, startY) {
      */
     function _loadImage() {
         _image = new Image();
-        _image.src = "../assets/cars/car" + _carType + ".svg";
+        _image.src = "assets/cars/car" + _carType + ".svg";
     }
 
     /**
