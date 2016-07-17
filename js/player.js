@@ -350,31 +350,51 @@ Controller.prototype.setDefaultBindings = function() {
 Controller.prototype.listenForNewBinding = function(target) {
     var self = this;
     var gamepad = this.getGamepad();
+
+    //Take a snapshot of current input state
+    var startState = {
+        axes: {},
+        buttons: {}
+    }
+
+    for(axis in gamepad.axes) {
+        startState.axes[axis] = gamepad.axes[axis];
+    }
+    for(button in gamepad.buttons) {
+        startState.buttons[button] = gamepad.buttons[button].value;
+    }
+
+    console.log(startState);
+
     function bindingPoll() {
         var found = false;
         for(axis in gamepad.axes) {
-            if(gamepad.axes[axis] < -0.2) {
-                found = true;
-                self.recordNewBinding(target, target.dataset.binding, {
-                    type: "axes",
-                    index: axis,
-                    threshold: -0.2
-                });
-                break;
-            } else if(gamepad.axes[axis] > 0.2) {
-                found = true;
-                self.recordNewBinding(target, target.dataset.binding, {
-                    type: "axes",
-                    index: axis,
-                    threshold: 0.2
-                });
-                break;
+            var difference = Math.abs(gamepad.axes[axis] - startState.axes[axis]);
+            if(difference > 0.5) {
+                if(gamepad.axes[axis] < -0.2) {
+                    found = true;
+                    self.recordNewBinding(target, target.dataset.binding, {
+                        type: "axes",
+                        index: axis,
+                        threshold: -0.2
+                    });
+                    break;
+                } else if(gamepad.axes[axis] > 0.2) {
+                    found = true;
+                    self.recordNewBinding(target, target.dataset.binding, {
+                        type: "axes",
+                        index: axis,
+                        threshold: 0.2
+                    });
+                    break;
+                }
             }
         }
 
         if(!found) {
             for(button in gamepad.buttons) {
-                if(gamepad.buttons[button].pressed) {
+                var difference = Math.abs(gamepad.buttons[button].value - startState.buttons[button]);
+                if(difference > 0.5) {
                     found = true;
                     self.recordNewBinding(target, target.dataset.binding, {
                         type: "buttons",
