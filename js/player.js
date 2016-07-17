@@ -5,13 +5,7 @@ var Player = function(id, startX, startY) {
     this._right = 0;
     this._id = id;
     this._car = new Car(startX, startY);
-    this._mappings = {
-        left: undefined,
-        right: undefined,
-        forward: undefined,
-        backward: undefined,
-        boost: undefined
-    }
+    this._mappings = undefined;
     this._playerDisplay = undefined;
     this._mappingListen = {};
 }
@@ -93,27 +87,29 @@ Player.prototype.addPlayerDisplay = function(playerDescription) {
     description.appendChild(this.getCar().getImage());
     display.appendChild(description);
     
-    var bindings = document.createElement("dl");
-    bindings.className = "bindings";
-    for (var key in this._mappings) {
-        var dt = document.createElement("dt");
-        dt.appendChild(document.createTextNode(key));
-        bindings.appendChild(dt);
+    if(typeof this._mappings !== "undefined") {
+        var bindings = document.createElement("dl");
+        bindings.className = "bindings";
+        for (var key in this._mappings) {
+            var dt = document.createElement("dt");
+            dt.appendChild(document.createTextNode(key));
+            bindings.appendChild(dt);
 
-        var dd = document.createElement("dd");
-        var button = document.createElement("button");
-        if(typeof this._mappings[key] == "object") {
-            button.innerText = this._mappings[key].type + "[" + this._mappings[key].index + "]";
-        } else {
-           button.innerText = this._mappings[key];
+            var dd = document.createElement("dd");
+            var button = document.createElement("button");
+            if(typeof this._mappings[key] == "object") {
+                button.innerText = this._mappings[key].type + "[" + this._mappings[key].index + "]";
+            } else {
+            button.innerText = this._mappings[key];
+            }
+            button.dataset.binding = key;
+            this._mappingListen[key] = this.startBindingListen.bind(this);
+            button.addEventListener("click", this._mappingListen[key]);
+            dd.appendChild(button);
+            bindings.appendChild(dd);
         }
-        button.dataset.binding = key;
-        this._mappingListen[key] = this.startBindingListen.bind(this);
-        button.addEventListener("click", this._mappingListen[key]);
-        dd.appendChild(button);
-        bindings.appendChild(dd);
+        display.appendChild(bindings);
     }
-    display.appendChild(bindings);
 
     players.appendChild(display);
 
