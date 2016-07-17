@@ -21,7 +21,7 @@ Player.prototype.getForward = function() {
 }
 
 Player.prototype.setForward = function(value) {
-    this._forward = value;
+    this._forward = Math.abs(value);
 }
 
 Player.prototype.getBackward = function() {
@@ -29,7 +29,7 @@ Player.prototype.getBackward = function() {
 }
 
 Player.prototype.setBackward = function(value) {
-    this._backward = value;
+    this._backward = Math.abs(value);
 }
 
 Player.prototype.getLeft = function() {
@@ -102,7 +102,12 @@ Player.prototype.addPlayerDisplay = function(playerDescription) {
         var dd = document.createElement("dd");
         var input = document.createElement("input");
         input.setAttribute("type", "text");
-        input.setAttribute("value", this._bindings[key]);
+        console.log(typeof this._bindings[key]);
+        if(typeof this._bindings[key] == "object") {
+            input.value = this._bindings[key].type + "[" + this._bindings[key].index + "]";
+        } else {
+            input.value = this._bindings[key];
+        }
         input.dataset.binding = key;
         this._bindingListen[key] = this.startBindingListen.bind(this);
         input.addEventListener("click", this._bindingListen[key]);
@@ -134,13 +139,18 @@ Player.prototype.startBindingListen = function(e) {
     e.target.addEventListener("click", this._bindingListen[e.target.dataset.binding]);
 }
 Player.prototype.recordNewBinding = function(target, binding, value) {
+    console.log(binding, value);
     this._bindings[binding] = value;
     this.endBindingListen(target);
 }
 Player.prototype.endBindingListen = function(target) {
     console.log("stopped listening");
 
-    target.value = this._bindings[target.dataset.binding];
+    if(typeof this._bindings[target.dataset.binding] == "object") {
+        target.value = this._bindings[target.dataset.binding].type + "[" + this._bindings[target.dataset.binding].index + "]";
+    } else {
+        target.value = this._bindings[target.dataset.binding];
+    }
     target.disabled = false;
 
     target.removeEventListener("click", this._bindingListen[target.dataset.binding]);
@@ -220,40 +230,166 @@ Keyboard.prototype.listenForNewBinding = function(target) {
 var Controller = function(gamepad, startX, startY) {
     Player.call(this, gamepad.index, startX, startY);
     this._gamepad = gamepad;
+    this.setDefaultBindings();
+    this._playerDisplay = this.addPlayerDisplay("controller");
 }
 Controller.prototype = Object.create(Player.prototype);
 Controller.prototype.constructor = Controller;
 Controller.prototype.getGamepad = function() {
     return this._gamepad;
 }
+Controller.prototype.getValue = function(action, asBoolean) {
+    if(typeof asBoolean === "undefined") {
+        var asBoolean = false;
+    }
+
+    var binding = this._bindings[action];
+    var gamepad = this.getGamepad();
+
+    if(!gamepad || !binding || (binding.type != "axes" && binding.type != "buttons")) {
+        throw new Error("Gamepad not defined");
+    } else if(!binding) {
+        throw new Error("Binding not defined");
+    } else if(binding.type != "axes" && binding.type != "buttons") {
+        throw new Error("Incorrect binding");
+    }
+    
+    if(binding.type == "axes") {
+        if(binding.threshold > 0) {
+            if(gamepad["axes"][binding.index] > binding.threshold) {
+                if(asBoolean) {
+                    return true;
+                } else {
+                    return gamepad["axes"][binding.index];
+                }
+            } else {
+                if(asBoolean) {
+                    return false;
+                } else {
+                    return gamepad["axes"][binding.index];
+                }
+            }
+        } else {
+            if(gamepad["axes"][binding.index] < binding.threshold) {
+                if(asBoolean) {
+                    return true;
+                } else {
+                    return gamepad["axes"][binding.index];
+                }
+            } else {
+                if(asBoolean) {
+                    return false;
+                } else {
+                    return gamepad["axes"][binding.index];
+                }
+            }
+        }
+    } else {
+        if(asBoolean) {
+            return gamepad["buttons"][binding.index].pressed;    
+        } else {
+            return gamepad["buttons"][binding.index].value;
+        }
+    }
+};
 Controller.prototype.updateMovement = function() {
     var gamepad = this.getGamepad();
 
-    if(gamepad.axes[0] < -0.2) {
-        this.setLeft(gamepad.axes[0]);
+    if(this.getValue("left", true)) {
+        this.setLeft(this.getValue("left"));
         this.setRight(0);
-    } else if(gamepad.axes[0] > 0.2) {
+    } else if(this.getValue("right", true)) {
         this.setLeft(0);
-        this.setRight(gamepad.axes[0]);
+        this.setRight(this.getValue("right"));
     } else {
         this.setLeft(0);
         this.setRight(0);
     }
 
-    if(gamepad.buttons[7].value > 0) {
-        this.setForward(gamepad.buttons[7].value);
+    if(this.getValue("forward", true)) {
+        this.setForward(this.getValue("forward"));
         this.setBackward(0);
-    } else if(gamepad.buttons[6].value > 0) {
+    } else if(this.getValue("backward", true)) {
         this.setForward(0);
-        this.setBackward(gamepad.buttons[6].value);
+        this.setBackward(this.getValue("backward"));
     } else {
         this.setForward(0);
         this.setBackward(0);
     }
 
-    if(gamepad.buttons[0].pressed) {
+    if(this.getValue("boost", true)) {
         this.enableBoost();
     } else {
         this.disableBoost();
     }
+}
+Controller.prototype.setDefaultBindings = function() {
+    this._bindings = {
+        left: {
+            type: "axes",
+            index: 0,
+            threshold: -0.2
+        },
+        right: {
+            type: "axes",
+            index: 0,
+            threshold: 0.2
+        },
+        forward: {
+            type: "buttons",
+            index: 7    
+        },
+        backward: {
+            type: "buttons",
+            index: 6    
+        },
+        boost: {
+            type: "buttons",
+            index: 0    
+        }
+    }
+}
+Controller.prototype.listenForNewBinding = function(target) {
+    var self = this;
+    var gamepad = this.getGamepad();
+    function bindingPoll() {
+        var found = false;
+        for(axis in gamepad.axes) {
+            if(gamepad.axes[axis] < -0.2) {
+                found = true;
+                self.recordNewBinding(target, target.dataset.binding, {
+                    type: "axes",
+                    index: axis,
+                    threshold: -0.2
+                });
+                break;
+            } else if(gamepad.axes[axis] > 0.2) {
+                found = true;
+                self.recordNewBinding(target, target.dataset.binding, {
+                    type: "axes",
+                    index: axis,
+                    threshold: 0.2
+                });
+                break;
+            }
+        }
+        
+        if(!found) {
+            for(button in gamepad.buttons) {
+                if(gamepad.buttons[button].pressed) {
+                    found = true;
+                    self.recordNewBinding(target, target.dataset.binding, {
+                        type: "buttons",
+                        index: button
+                    });
+                    break;
+                }
+            }
+        }
+
+        if(!found) {
+            requestAnimationFrame(bindingPoll);
+        }
+    }
+    requestAnimationFrame(bindingPoll);
 }

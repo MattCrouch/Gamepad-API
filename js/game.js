@@ -49,9 +49,12 @@ var Game = (function(canvas) {
         var player = _findController(gamepad.index);
 
         if(player) {
+            player.removePlayerDisplay();
             var index = _players.indexOf(player);
-
+            
             _players.splice(index, 1);
+
+            
         }
     }
 
